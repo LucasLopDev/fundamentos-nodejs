@@ -144,4 +144,24 @@ app.get("/account/:cpf",verifyIfExistsAccountCPF, (request,response) => {
   return response.json(customer);
 });
 
+app.delete("/account/:cpf", verifyIfExistsAccountCPF, (request,response) => {
+  const { cpf } = request.params;
+  const customerindex = customers.findIndex(customers => customers.cpf === cpf);
+
+  if(customerindex === -1)
+    return response.status(404).json({ error: "Repository Not Found!"})
+
+  customers.splice(customerindex, 1);
+
+  return response.status(200).json(customers);
+});
+
+app.get("/balance/:cpf", verifyIfExistsAccountCPF, (request, response) => {
+  const {customer} = request;
+
+  const balance = getBalance(customer.statement);
+
+  return response.json(balance);
+});
+
 app.listen(3333);
