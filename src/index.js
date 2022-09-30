@@ -8,6 +8,22 @@ const customers = [];
 
 app.use(express.json());
 
+//Middleware
+function verifyIfExistsAccountCPF(request, response, next){
+
+  const { cpf } = request.params;
+
+  const customer = customers.find(customer => customer.cpf === cpf);
+
+  if(!customer){
+    return response.status(400).json({ error: "Customer not found"})
+  }
+  
+  request.customer = customer;
+
+  return next();
+}
+
 /**
  * cpf - string
  * name - string
@@ -37,16 +53,13 @@ app.post ("/account", (request, response) => {
 
 })
 
-app.get("/statement/:cpf", (request, response) => {
-  const { cpf } = request.params;
+// app.use(Middleware); If all routes will use the same middleware
 
-  const customer = customers.find(customer => customer.cpf === cpf);
-
-  if(!customer){
-    return response.status(400).json({ error: "Customer not found"})
-  }
-  
+app.get("/statement/:cpf", verifyIfExistsAccountCPF, (request, response) => {
+  const { customer } = request;
   return response.json(customer.statement);
-})
+});
+
+
 
 app.listen(3333);
